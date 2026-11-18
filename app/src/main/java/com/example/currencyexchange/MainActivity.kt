@@ -58,6 +58,8 @@ fun CurrencyScreen(viewModel: CurrencyViewModel = viewModel()) {
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         var query by rememberSaveable { mutableStateOf("") }
+        var selectedCurrency by rememberSaveable { mutableStateOf(CurrencyType.USD) }
+        var sortAscending by rememberSaveable { mutableStateOf(true) }
         Box(
             modifier = Modifier.padding(innerPadding)
         ) {
@@ -90,10 +92,18 @@ fun CurrencyScreen(viewModel: CurrencyViewModel = viewModel()) {
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         CityFilter(allCities, query, { query = it})
-                        val filteredFilials = viewModel.filials.filter {
-                            query.isBlank() || it.name.contains(query, ignoreCase = true)
-                        }
-                        if (filteredFilials.isEmpty()) {
+                        Sorting(selectedCurrency,
+                            {selectedCurrency = it},
+                            sortAscending,
+                            {sortAscending = !sortAscending})
+
+                        val filteredAndSortedFilials = viewModel.filials
+                            .filter { query.isBlank() || it.name.contains(query, ignoreCase = true) }
+                            .filter { it.getBuyRate(selectedCurrency) > 0.0 }
+                            .sortedBy { it.getBuyRate(selectedCurrency) }
+                            .let { if (!sortAscending) it.reversed() else it }
+
+                        if (filteredAndSortedFilials.isEmpty()) {
                             Text(text = "нет совпадений",
                                 modifier = Modifier
                                     .align(Alignment.CenterHorizontally)
@@ -103,7 +113,7 @@ fun CurrencyScreen(viewModel: CurrencyViewModel = viewModel()) {
                             verticalArrangement = Arrangement.spacedBy(16.dp) ,
                             contentPadding = PaddingValues(16.dp),
                         ) {
-                            items(filteredFilials, key = { it.filial_id }) { filial ->
+                            items(filteredAndSortedFilials, key = { it.filial_id }) { filial ->
                                 FilialCard(filial)
                             }
                         }

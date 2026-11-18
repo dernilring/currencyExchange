@@ -1,5 +1,7 @@
 package com.example.currencyexchange
 
+import java.util.Currency
+
 data class Filial(
      val filial_id: String,
      val sap_id: String?,
@@ -28,3 +30,17 @@ data class Filial(
      val CNY_USD_in: String,
      val CNY_USD_out: String,
 )
+
+fun Filial.getBuyRate(type: CurrencyType): Double = when (type) {
+     CurrencyType.USD -> USD_in
+     CurrencyType.EUR -> EUR_in
+     CurrencyType.RUB -> RUB_in
+     CurrencyType.CNY -> CNY_in
+}.toDoubleOrNull() ?: 0.0
+
+fun Filial.getSellRate(type: CurrencyType): Double = when (type) {
+     CurrencyType.USD -> USD_out
+     CurrencyType.EUR -> EUR_out
+     CurrencyType.RUB -> RUB_out
+     CurrencyType.CNY -> CNY_out
+}.toDoubleOrNull() ?: 0.0
