@@ -7,7 +7,7 @@ import retrofit2.create
 import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
-    private val BASE_URL = "https://belarusbank.by/api"
+    private val BASE_URL = "https://belarusbank.by"
 
     private val okHttpClient: OkHttpClient by lazy{
         OkHttpClient.Builder()

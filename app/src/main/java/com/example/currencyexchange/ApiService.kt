@@ -4,6 +4,6 @@ import retrofit2.http.GET
 
 interface ApiService {
 
-    @GET("kursExchange")
-    suspend fun getCurrency() : FilialResponse
+    @GET("api/kursExchange")
+    suspend fun getCurrency() : List<Filial>
 }
