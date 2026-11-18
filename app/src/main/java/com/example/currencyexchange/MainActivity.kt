@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -33,6 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.currencyexchange.ui.theme.CurrencyExchangeTheme
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +57,7 @@ class MainActivity : ComponentActivity() {
 fun CurrencyScreen(viewModel: CurrencyViewModel = viewModel()) {
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        var query by rememberSaveable { mutableStateOf("") }
         Box(
             modifier = Modifier.padding(innerPadding)
         ) {
@@ -76,14 +84,31 @@ fun CurrencyScreen(viewModel: CurrencyViewModel = viewModel()) {
                 }
 
                 else -> {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(16.dp) ,
-                        contentPadding = PaddingValues(16.dp),
+                    val allCities = viewModel.filials.map {it.name}.distinct()
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(viewModel.filials, key = { it.filial_id }) { filial ->
-                          FilialCard(filial)
+                        CityFilter(allCities, query, { query = it})
+                        val filteredFilials = viewModel.filials.filter {
+                            query.isBlank() || it.name.contains(query, ignoreCase = true)
+                        }
+                        if (filteredFilials.isEmpty()) {
+                            Text(text = "нет совпадений",
+                                modifier = Modifier
+                                    .align(Alignment.CenterHorizontally)
+                                    .padding(26.dp))
+                        }
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(16.dp) ,
+                            contentPadding = PaddingValues(16.dp),
+                        ) {
+                            items(filteredFilials, key = { it.filial_id }) { filial ->
+                                FilialCard(filial)
+                            }
                         }
                     }
+
                 }
             }
         }
